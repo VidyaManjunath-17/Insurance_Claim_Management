@@ -61,19 +61,19 @@ public class DashboardServiceImpl implements DashboardService {
                 .filter(c -> c.getStatus() == ClaimStatus.REJECTED)
                 .count();
 
-        // Calculate amounts
-        double totalCoverageAmount = policyRepository.findAll().stream()
-                .mapToDouble(p -> p.getCoverageAmount() != null ? p.getCoverageAmount() : 0.0)
-                .sum();
+        // Calculate amounts using BigDecimal
+        java.math.BigDecimal totalCoverageAmount = policyRepository.findAll().stream()
+                .map(p -> p.getCoverageAmount() != null ? p.getCoverageAmount() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
-        double totalClaimAmount = allClaims.stream()
-                .mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0)
-                .sum();
+        java.math.BigDecimal totalClaimAmount = allClaims.stream()
+                .map(c -> c.getClaimAmount() != null ? c.getClaimAmount() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
-        double totalApprovedAmount = allClaims.stream()
+        java.math.BigDecimal totalApprovedAmount = allClaims.stream()
                 .filter(c -> c.getStatus() == ClaimStatus.APPROVED)
-                .mapToDouble(c -> c.getClaimAmount() != null ? c.getClaimAmount() : 0.0)
-                .sum();
+                .map(c -> c.getClaimAmount() != null ? c.getClaimAmount() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
         // Get monthly claims data (last 6 months)
         List<MonthlyClaimData> monthlyClaimsData = getMonthlyClaimsData();

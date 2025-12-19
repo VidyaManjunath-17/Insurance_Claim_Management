@@ -1,5 +1,6 @@
 package com.capstone.insurance.controllers;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.policy.AssignPolicyRequest;
 import com.capstone.insurance.dto.policy.PolicyCreateRequest;
 import com.capstone.insurance.dto.policy.PolicyDto;
@@ -28,8 +29,9 @@ public class PolicyController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<PolicyDto>> getAllPolicies() {
-        return ResponseEntity.ok(policyService.getAllPolicies());
+    public ResponseEntity<PaginatedResponse<PolicyDto>> getAllPolicies(
+            @RequestParam(defaultValue = "0") int page) {
+        return ResponseEntity.ok(policyService.getAllPoliciesPaginated(page));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

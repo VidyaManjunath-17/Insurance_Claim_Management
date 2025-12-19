@@ -1,5 +1,6 @@
 package com.capstone.insurance.controllers;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.customer.CustomerCreateRequest;
 import com.capstone.insurance.dto.customer.CustomerDto;
 import com.capstone.insurance.dto.customer.CustomerUpdateRequest;
@@ -28,8 +29,9 @@ public class CustomerController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<CustomerDto>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public ResponseEntity<PaginatedResponse<CustomerDto>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page) {
+        return ResponseEntity.ok(customerService.getAllCustomersPaginated(page));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

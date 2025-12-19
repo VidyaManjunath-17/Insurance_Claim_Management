@@ -1,5 +1,6 @@
 package com.capstone.insurance.services.impl;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.claim.ClaimCreateRequest;
 import com.capstone.insurance.dto.claim.ClaimDto;
 import com.capstone.insurance.dto.claim.ClaimStatusUpdateRequest;
@@ -11,6 +12,9 @@ import com.capstone.insurance.repositories.*;
 import com.capstone.insurance.services.ActivityLogService;
 import com.capstone.insurance.services.ClaimService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +66,7 @@ public class ClaimServiceImpl implements ClaimService {
         // Log activity: Claim submitted
         activityLogService.logAction(userId, 
                 "CLAIM_SUBMITTED", 
-                String.format("Claim %s submitted for policy %s. Amount: $%.2f", 
+                String.format("Claim %s submitted for policy %s. Amount: $%s", 
                         claimNumber, 
                         policy.getPolicyCode(), 
                         request.getClaimAmount()));
@@ -115,6 +119,50 @@ public class ClaimServiceImpl implements ClaimService {
         }
 
         return claims.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginatedResponse<ClaimDto> getAllClaimsPaginated(int page, String status, LocalDate from, LocalDate to) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Claim> claimPage;
+        LocalDateTime fromDt = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDt = to != null ? to.atTime(23, 59, 59) : null;
+
+        if (status != null && !status.isBlank()) {
+            ClaimStatus st;
+            try {
+                st = ClaimStatus.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid claim status: " + status);
+            }
+
+            if (fromDt != null && toDt != null) {
+                claimPage = claimRepository.findByStatusAndCreatedAtBetween(st, fromDt, toDt, pageable);
+            } else {
+                claimPage = claimRepository.findByStatus(st, pageable);
+            }
+        } else {
+            if (fromDt != null && toDt != null) {
+                claimPage = claimRepository.findByCreatedAtBetween(fromDt, toDt, pageable);
+            } else {
+                claimPage = claimRepository.findAll(pageable);
+            }
+        }
+
+        List<ClaimDto> content = claimPage.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return PaginatedResponse.<ClaimDto>builder()
+                .content(content)
+                .currentPage(page)
+                .pageSize(10)
+                .totalElements(claimPage.getTotalElements())
+                .totalPages(claimPage.getTotalPages())
+                .hasNext(claimPage.hasNext())
+                .hasPrevious(claimPage.hasPrevious())
+                .build();
     }
 
     @Override

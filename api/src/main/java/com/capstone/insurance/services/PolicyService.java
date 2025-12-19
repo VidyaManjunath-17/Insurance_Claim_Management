@@ -1,5 +1,6 @@
 package com.capstone.insurance.services;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.policy.AssignPolicyRequest;
 import com.capstone.insurance.dto.policy.CustomerPolicyDto;
 import com.capstone.insurance.dto.policy.PolicyCreateRequest;
@@ -14,6 +15,8 @@ public interface PolicyService {
     PolicyDto createPolicy(PolicyCreateRequest request);
 
     List<PolicyDto> getAllPolicies();
+
+    PaginatedResponse<PolicyDto> getAllPoliciesPaginated(int page);
 
     PolicyDto getPolicyById(UUID id);
 

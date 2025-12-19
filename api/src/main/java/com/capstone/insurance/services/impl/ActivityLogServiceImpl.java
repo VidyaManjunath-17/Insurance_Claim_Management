@@ -1,5 +1,6 @@
 package com.capstone.insurance.services.impl;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.activity.ActivityLogCreateRequest;
 import com.capstone.insurance.dto.activity.ActivityLogDto;
 import com.capstone.insurance.entities.ActivityLog;
@@ -9,6 +10,10 @@ import com.capstone.insurance.repositories.ActivityLogRepository;
 import com.capstone.insurance.repositories.UserRepository;
 import com.capstone.insurance.services.ActivityLogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +47,27 @@ public class ActivityLogServiceImpl implements ActivityLogService {
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // Most recent first
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginatedResponse<ActivityLogDto> getAllActivityLogsPaginated(int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<ActivityLog> activityLogPage = activityLogRepository.findAll(pageable);
+        
+        List<ActivityLogDto> content = activityLogPage.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+        
+        return PaginatedResponse.<ActivityLogDto>builder()
+                .content(content)
+                .currentPage(page)
+                .pageSize(10)
+                .totalElements(activityLogPage.getTotalElements())
+                .totalPages(activityLogPage.getTotalPages())
+                .hasNext(activityLogPage.hasNext())
+                .hasPrevious(activityLogPage.hasPrevious())
+                .build();
     }
 
     @Override

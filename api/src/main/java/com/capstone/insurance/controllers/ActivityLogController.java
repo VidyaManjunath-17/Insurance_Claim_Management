@@ -2,6 +2,7 @@ package com.capstone.insurance.controllers;
 
 import com.capstone.insurance.dto.activity.ActivityLogCreateRequest;
 import com.capstone.insurance.dto.activity.ActivityLogDto;
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.services.ActivityLogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,9 @@ public class ActivityLogController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ActivityLogDto>> getAllActivityLogs() {
-        return ResponseEntity.ok(activityLogService.getAllActivityLogs());
+    public ResponseEntity<PaginatedResponse<ActivityLogDto>> getAllActivityLogs(
+            @RequestParam(defaultValue = "0") int page) {
+        return ResponseEntity.ok(activityLogService.getAllActivityLogsPaginated(page));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

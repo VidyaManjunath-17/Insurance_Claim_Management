@@ -4,6 +4,7 @@ import com.capstone.insurance.entities.enums.ClaimStatus;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ public class ClaimDto {
     private java.util.UUID policyId;
     private String policyNumber; // Policy number from CustomerPolicy
     private LocalDate claimDate;
-    private Double claimAmount;
+    private BigDecimal claimAmount;
     private ClaimStatus status;
     private String description;
     private String remarks;

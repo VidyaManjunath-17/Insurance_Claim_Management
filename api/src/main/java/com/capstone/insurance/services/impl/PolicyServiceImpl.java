@@ -1,5 +1,6 @@
 package com.capstone.insurance.services.impl;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.policy.AssignPolicyRequest;
 import com.capstone.insurance.dto.policy.CustomerPolicyDto;
 import com.capstone.insurance.dto.policy.PolicyCreateRequest;
@@ -15,6 +16,9 @@ import com.capstone.insurance.repositories.CustomerRepository;
 import com.capstone.insurance.repositories.PolicyRepository;
 import com.capstone.insurance.services.PolicyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +85,27 @@ public class PolicyServiceImpl implements PolicyService {
     }
 
     @Override
+    public PaginatedResponse<PolicyDto> getAllPoliciesPaginated(int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Policy> policyPage = policyRepository.findAll(pageable);
+        
+        List<PolicyDto> content = policyPage.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+        
+        return PaginatedResponse.<PolicyDto>builder()
+                .content(content)
+                .currentPage(page)
+                .pageSize(10)
+                .totalElements(policyPage.getTotalElements())
+                .totalPages(policyPage.getTotalPages())
+                .hasNext(policyPage.hasNext())
+                .hasPrevious(policyPage.hasPrevious())
+                .build();
+    }
+
+    @Override
     public PolicyDto getPolicyById(UUID id) {
         Policy policy = policyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id " + id));
@@ -111,7 +136,12 @@ public class PolicyServiceImpl implements PolicyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id " + request.getPolicyId()));
 
         if (customerPolicyRepository.existsByCustomerIdAndPolicyId(customer.getId(), policy.getId())) {
-            throw new BadRequestException("Policy already assigned to this customer");
+            throw new BadRequestException(
+                String.format("The policy %s is already assigned to customer %s (%s).", 
+                    policy.getPolicyCode(), 
+                    customer.getName(), 
+                    customer.getEmail())
+            );
         }
 
         // Generate random policy number (mix of numbers and characters)

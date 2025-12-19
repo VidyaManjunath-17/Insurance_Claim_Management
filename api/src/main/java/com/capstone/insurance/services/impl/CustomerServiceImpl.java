@@ -1,5 +1,6 @@
 package com.capstone.insurance.services.impl;
 
+import com.capstone.insurance.dto.common.PaginatedResponse;
 import com.capstone.insurance.dto.customer.CustomerCreateRequest;
 import com.capstone.insurance.dto.customer.CustomerDto;
 import com.capstone.insurance.dto.customer.CustomerUpdateRequest;
@@ -12,11 +13,13 @@ import com.capstone.insurance.repositories.CustomerRepository;
 import com.capstone.insurance.repositories.UserRepository;
 import com.capstone.insurance.services.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -128,6 +131,27 @@ public class CustomerServiceImpl implements CustomerService {
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginatedResponse<CustomerDto> getAllCustomersPaginated(int page) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Customer> customerPage = customerRepository.findAll(pageable);
+        
+        List<CustomerDto> content = customerPage.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+        
+        return PaginatedResponse.<CustomerDto>builder()
+                .content(content)
+                .currentPage(page)
+                .pageSize(10)
+                .totalElements(customerPage.getTotalElements())
+                .totalPages(customerPage.getTotalPages())
+                .hasNext(customerPage.hasNext())
+                .hasPrevious(customerPage.hasPrevious())
+                .build();
     }
 
     @Override

@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,8 +29,8 @@ public class Policy {
     @Column(name = "policy_code", nullable = false, unique = true, length = 20)
     private String policyCode;
 
-    @Column(name = "coverage_amount", nullable = false)
-    private Double coverageAmount;
+    @Column(name = "coverage_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal coverageAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "policy_type", nullable = false, length = 30)

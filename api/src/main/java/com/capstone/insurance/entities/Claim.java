@@ -4,6 +4,7 @@ import com.capstone.insurance.entities.enums.ClaimStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -31,8 +32,8 @@ public class Claim {
     @Column(name = "claim_date")
     private LocalDate claimDate;
 
-    @Column(name = "claim_amount", nullable = false)
-    private Double claimAmount;
+    @Column(name = "claim_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal claimAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

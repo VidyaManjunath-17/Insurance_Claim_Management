@@ -3,6 +3,7 @@ package com.capstone.insurance.dto.dashboard;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -14,9 +15,9 @@ public class AdminDashboardStatsDto {
     private Long pendingClaims;
     private Long approvedClaims;
     private Long rejectedClaims;
-    private Double totalCoverageAmount;
-    private Double totalClaimAmount;
-    private Double totalApprovedAmount;
+    private BigDecimal totalCoverageAmount;
+    private BigDecimal totalClaimAmount;
+    private BigDecimal totalApprovedAmount;
     private List<MonthlyClaimData> monthlyClaimsData;
     private List<PolicyTypeDistribution> policyTypeDistribution;
 }
